@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photopic</title>
+<style>
+  :root {
+    --bg:      #111;
+    --card:    #1c1c1c;
+    --card2:   #262626;
+    --border:  #333;
+    --text:    #e8e8e8;
+    --text-2:  #bbb;
+    --text-3:  #777;
+    --accent:  #d8a13a;
+    --accent2: #e0b050;
+    --radius:  12px;
+    --rsm:     8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--text);
+    user-select: none;
+  }
+
+  /* ══════ TITLE BAR (draggable) ══════ */
+  #titlebar {
+    height: 30px;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+  }
+
+  /* ══════ LAUNCH SCREEN ══════ */
+  #launch-screen {
+    position: fixed; inset: 0; z-index: 2000;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #launch-screen.hidden { display: none; }
+  #launch-logo { width: 96px; height: 96px; margin-bottom: 10px; -webkit-user-drag: none; }
+  #launch-title { font-size: 26px; font-weight: 700; letter-spacing: 4px; margin-bottom: 4px; }
+  #launch-subtitle { font-size: 11px; color: var(--text-3); letter-spacing: 2px; margin-bottom: 28px; text-transform: uppercase; }
+  #launch-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 28px; width: 380px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #launch-card-title { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 2px; }
+  #launch-cancel-btn {
+    display: none; position: fixed; top: 44px; right: 20px;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 50%; width: 34px; height: 34px;
+    color: var(--text); font-size: 16px; line-height: 1;
+    cursor: pointer; align-items: center; justify-content: center;
+    z-index: 2001; -webkit-app-region: no-drag;
+  }
+  #launch-cancel-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #launch-list { display: flex; flex-direction: column; gap: 4px; max-height: 210px; overflow-y: auto; }
+  #launch-list::-webkit-scrollbar { width: 4px; }
+  #launch-list::-webkit-scrollbar-thumb { background: var(--card2); border-radius: 4px; }
+  #launch-empty { font-size: 12px; color: var(--text-3); padding: 12px 4px; text-align: center; }
+  .album-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--rsm);
+    background: var(--card2); border: 1.5px solid transparent;
+    cursor: pointer; transition: background .12s, border-color .12s;
+    font-size: 12px;
+  }
+  .album-item:hover { border-color: var(--border); }
+  .album-item-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; -webkit-user-drag: none; }
+  .album-item-name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .album-item-meta { font-size: 10px; color: var(--text-3); flex-shrink: 0; }
+  .album-del {
+    opacity: 0; background: none; border: none; color: var(--text-3);
+    cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px;
+    transition: opacity .12s, color .12s; flex-shrink: 0;
+  }
+  .album-item:hover .album-del { opacity: 1; }
+  .album-del:hover { color: #e07040; }
+  .album-rename {
+    opacity: 0; background: none; border: none; color: var(--text-3);
+    cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px;
+    transition: opacity .12s, color .12s; flex-shrink: 0;
+  }
+  .album-item:hover .album-rename { opacity: 1; }
+  .album-rename:hover { color: var(--accent); }
+  .album-rename-input {
+    flex: 1; min-width: 0; font: inherit; font-weight: 600;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--accent); border-radius: 4px;
+    padding: 2px 6px; outline: none;
+  }
+  #launch-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+  #launch-new-row { display: flex; gap: 8px; }
+  #launch-new-input {
+    flex: 1; padding: 9px 12px; border-radius: var(--rsm);
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text); font-size: 12px; outline: none; font-family: inherit;
+  }
+  #launch-new-input::placeholder { color: var(--text-3); }
+  #launch-new-input:focus { border-color: var(--accent); }
+  #launch-create-btn {
+    padding: 9px 14px; border-radius: var(--rsm);
+    background: rgba(216,161,58,0.15); border: 1px solid rgba(216,161,58,0.4);
+    color: var(--accent); font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap;
+    transition: background .15s;
+  }
+  #launch-create-btn:hover { background: rgba(216,161,58,0.28); }
+  #launch-drop-zone {
+    margin-top: 2px; padding: 16px 12px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--rsm);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: var(--text-3); font-size: 11px; cursor: pointer;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  #launch-drop-zone:hover { border-color: var(--text-3); color: var(--text-2); }
+  #launch-drop-zone.drag-over {
+    border-color: var(--accent); background: rgba(216,161,58,0.10); color: var(--accent);
+  }
+  #launch-drop-zone.scanning { color: var(--accent2); border-color: var(--accent2); }
+  #launch-drop-icon { font-size: 16px; }
+
+  /* ══════ GALLERY ══════ */
+  #gallery-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #gallery {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    padding: 16px;
+    height: 100%;
+  }
+
+  .thumb {
+    position: relative;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    transition: opacity 0.4s ease;
+  }
+  .thumb:hover img { opacity: 0.85; }
+  .thumb.faded { opacity: 0; pointer-events: none; }
+  .thumb-del {
+    position: absolute; top: 4px; right: 4px; z-index: 3;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); border: none; color: #fff;
+    font-size: 12px; line-height: 1; cursor: pointer; opacity: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .12s, background .12s;
+  }
+  .thumb:hover .thumb-del { opacity: 1; }
+  .thumb-del:hover { background: #e07040; }
+  .thumb.dragging { opacity: 0.35; }
+  .thumb.drag-over { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 2px; }
+  .thumb.thumb-missing { background: var(--card2); border: 1px dashed var(--border); }
+  .thumb.thumb-missing::after {
+    content: '🚫'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; opacity: 0.45;
+  }
+
+  /* Dismissible notice toast */
+  #notice {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 750; display: none; align-items: center; gap: 12px;
+    max-width: 90%; padding: 9px 12px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--rsm);
+    box-shadow: 0 8px 26px rgba(0,0,0,.5); color: var(--text); font-size: 12px;
+  }
+  #notice.show { display: flex; }
+  #notice-text { flex: 1; }
+  #notice-action {
+    background: rgba(216,161,58,0.16); border: 1px solid rgba(216,161,58,0.45);
+    color: var(--accent); font-size: 11px; padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  #notice-action:hover { background: rgba(216,161,58,0.3); }
+  #notice-close { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 13px; padding: 2px 4px; }
+  #notice-close:hover { color: var(--text); }
+  /* Thumbnails keep their native aspect ratio, aligned to the top of the cell
+     (clean contact-sheet rows) but centered horizontally so narrow/vertical
+     images don't jam against the left edge. */
+  .thumb img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: top;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  #gallery-empty {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column; gap: 10px;
+    align-items: center; justify-content: center;
+    color: var(--text-3); font-size: 14px; text-align: center;
+  }
+  #gallery-empty.show { display: flex; }
+  #gallery-empty .big { font-size: 40px; }
+
+  /* The animated flying image — transparent so the letterbox around a photo
+     shows the album's background colour rather than a hardcoded black. */
+  #flyer {
+    position: fixed;
+    display: none;
+    object-fit: contain;
+    background: transparent;
+    z-index: 500;
+    cursor: pointer;
+    transition: left 0.4s ease, top 0.4s ease, width 0.4s ease, height 0.4s ease;
+  }
+
+  /* Drop overlay while dragging onto gallery */
+  #drop-overlay {
+    position: absolute; inset: 0; z-index: 700;
+    display: none; flex-direction: column; gap: 10px;
+    align-items: center; justify-content: center;
+    background: rgba(17,17,17,0.85);
+    border: 2px dashed var(--accent);
+    color: var(--accent); font-size: 15px;
+    pointer-events: none;
+  }
+  #drop-overlay.active { display: flex; }
+  #drop-overlay .big { font-size: 34px; }
+
+  /* Bottom bar */
+  #bottom-bar {
+    height: 40px;
+    background: #1a1a1a;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    color: var(--text-2);
+    font-size: 13px;
+    flex-shrink: 0;
+    z-index: 600;
+  }
+  #bar-left { display: flex; align-items: center; gap: 12px; }
+  #brand { color: var(--text-3); font-style: italic; letter-spacing: 1px; }
+  #album-name { color: var(--text); font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  #album-name:hover { color: var(--accent); }
+  #album-name-input {
+    font: inherit; font-weight: 600; color: var(--text);
+    background: var(--card2); border: 1px solid var(--accent);
+    border-radius: 4px; padding: 2px 6px; outline: none; width: 200px;
+  }
+  #status { color: var(--text-3); font-size: 12px; }
+  #page-info { display: flex; align-items: center; gap: 8px; }
+
+  .nav-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 26px; height: 22px;
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 3px;
+    transition: background 0.15s;
+  }
+  .nav-btn:hover { background: var(--accent); border-color: var(--accent); color: #111; }
+  .nav-btn.drag-target { background: var(--accent); border-color: var(--accent); color: #111; box-shadow: 0 0 0 3px rgba(216,161,58,0.35); }
+  #btn-albums {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text-2); font-size: 11px; padding: 4px 10px;
+    border-radius: 4px; cursor: pointer; transition: background .15s, color .15s;
+  }
+  #btn-albums:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Toolbar controls (bg color, music, slideshow) */
+  #bar-tools { display: flex; align-items: center; gap: 8px; }
+  .tool-btn {
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--text-2); font-size: 11px; padding: 4px 10px;
+    border-radius: 4px; cursor: pointer; transition: background .15s, color .15s;
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  }
+  .tool-btn:hover { color: var(--accent); border-color: var(--accent); }
+  #bg-color {
+    width: 28px; height: 22px; padding: 1px; cursor: pointer;
+    background: var(--card2); border: 1px solid var(--border); border-radius: 4px;
+  }
+  #bg-color::-webkit-color-swatch-wrapper { padding: 0; }
+  #bg-color::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+  /* Music popover */
+  #music-pop {
+    position: fixed; z-index: 900; display: none; flex-direction: column; gap: 6px;
+    width: 300px; max-height: 300px; padding: 10px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--rsm);
+    box-shadow: 0 10px 34px rgba(0,0,0,.5);
+  }
+  #music-pop.open { display: flex; }
+  .music-pop-title { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1.2px; }
+  #music-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+  #music-list::-webkit-scrollbar { width: 4px; }
+  #music-list::-webkit-scrollbar-thumb { background: var(--card2); border-radius: 4px; }
+  .music-row { display: flex; align-items: center; gap: 8px; padding: 7px 9px; background: var(--card2); border-radius: 6px; font-size: 12px; }
+  .music-row.dragging { opacity: 0.4; }
+  .music-row.drag-over { box-shadow: inset 0 2px 0 var(--accent); }
+  .music-grip { color: var(--text-3); cursor: grab; font-size: 12px; flex-shrink: 0; line-height: 1; }
+  .music-grip:active { cursor: grabbing; }
+  .music-row-ico { color: var(--text-3); flex-shrink: 0; }
+  .music-row-name { flex: 1; min-width: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .music-row-del { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px; flex-shrink: 0; }
+  .music-row-del:hover { color: #e07040; }
+  .music-empty { font-size: 12px; color: var(--text-3); padding: 8px 6px; text-align: center; }
+
+  /* ══════ SLIDESHOW ══════ */
+  #slideshow {
+    position: fixed; inset: 0; z-index: 1500;
+    background: #000; display: none; overflow: hidden;
+    align-items: center; justify-content: center; cursor: none;
+  }
+  #slideshow.active { display: flex; }
+  #slideshow.show-cursor { cursor: default; }
+  .slide-img {
+    position: absolute; inset: 0; margin: auto;
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    opacity: 0; transition: opacity 0.9s ease;
+    will-change: opacity, transform;
+  }
+  .slide-img.visible { opacity: 1; }
+  /* Ken Burns — a randomly-chosen slow zoom/pan per slide (animation-fill:forwards
+     holds the end state so the outgoing image doesn't snap back during the fade). */
+  @keyframes kb0 { from { transform: scale(1);    } to { transform: scale(1.12); } }
+  @keyframes kb1 { from { transform: scale(1.12); } to { transform: scale(1);    } }
+  @keyframes kb2 { from { transform: scale(1.06) translate(0,0);      } to { transform: scale(1.16) translate(-2.5%,-2%); } }
+  @keyframes kb3 { from { transform: scale(1.06) translate(0,0);      } to { transform: scale(1.16) translate(2.5%,2%);  } }
+  #slide-counter {
+    position: fixed; top: 20px; right: 24px;
+    color: rgba(255,255,255,0.85); font-size: 13px; letter-spacing: 1px;
+    z-index: 1600; opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  #slideshow.show-cursor #slide-counter { opacity: 1; }
+  #slide-controls {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 70px;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+    z-index: 1600; opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  #slideshow.show-cursor #slide-controls { opacity: 1; pointer-events: auto; }
+  .slide-ctrl {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+    color: #fff; width: 42px; height: 42px; border-radius: 50%;
+    font-size: 15px; cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slide-ctrl:hover { background: rgba(255,255,255,0.26); }
+  .slide-ctrl.on { background: rgba(255,255,255,0.9); border-color: #fff; color: #111; }
+  .slide-sep { width: 1px; height: 26px; background: rgba(255,255,255,0.22); }
+  .slide-field { display: flex; align-items: center; gap: 7px; color: #fff; font-size: 12px; }
+  .slide-ico { font-size: 14px; opacity: 0.9; }
+  .slide-field input[type=range] { width: 92px; accent-color: #fff; cursor: pointer; }
+  #slide-speed-lbl { width: 34px; text-align: left; color: rgba(255,255,255,0.85); }
+</style>
+</head>
+<body>
+
+<div id="titlebar"></div>
+
+<!-- ── Launch Screen ── -->
+<div id="launch-screen">
+  <img id="launch-logo" src="logo.png" alt="">
+  <div id="launch-title">PHOTOPIC</div>
+  <div id="launch-subtitle">Photo Gallery</div>
+  <button id="launch-cancel-btn" title="Back to gallery">✕</button>
+  <div id="launch-card">
+    <div id="launch-card-title">Select an Album</div>
+    <div id="launch-list"><div id="launch-empty">No albums yet — create one below.</div></div>
+    <hr id="launch-divider"/>
+    <div id="launch-new-row">
+      <input type="text" id="launch-new-input" placeholder="New album name…"/>
+      <button id="launch-create-btn">+ Create</button>
+    </div>
+    <div id="launch-drop-zone">
+      <span id="launch-drop-icon">📂</span>
+      <span id="launch-drop-text">Drop a folder of photos — or click to choose</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Gallery ── -->
+<div id="gallery-area">
+  <div id="gallery"></div>
+  <div id="gallery-empty">
+    <span class="big">🖼️</span>
+    <span>This album is empty.</span>
+    <span style="font-size:12px;color:var(--text-3)">Drop a folder or photos here to add them.</span>
+  </div>
+  <div id="drop-overlay">
+    <span class="big">📥</span>
+    <span>Drop to add photos</span>
+  </div>
+  <div id="notice">
+    <span id="notice-text"></span>
+    <button id="notice-action"></button>
+    <button id="notice-close" title="Dismiss">✕</button>
+  </div>
+</div>
+
+<img id="flyer" src="" alt="">
+
+<!-- ── Slideshow ── -->
+<div id="slideshow">
+  <img class="slide-img" id="slide-a" src="" alt="">
+  <img class="slide-img" id="slide-b" src="" alt="">
+  <div id="slide-counter"></div>
+  <div id="slide-controls">
+    <button class="slide-ctrl" id="slide-shuffle" title="Shuffle order">🔀</button>
+    <button class="slide-ctrl" id="slide-prev" title="Previous">⏮</button>
+    <button class="slide-ctrl" id="slide-playpause" title="Pause / resume">⏸</button>
+    <button class="slide-ctrl" id="slide-next" title="Next">⏭</button>
+    <div class="slide-sep"></div>
+    <span class="slide-field" title="Seconds per slide">
+      <span class="slide-ico">⏱</span>
+      <input type="range" id="slide-speed" min="1" max="15" step="0.5" value="4.5">
+      <span id="slide-speed-lbl">4.5s</span>
+    </span>
+    <span class="slide-field" title="Music volume">
+      <span class="slide-ico">🔊</span>
+      <input type="range" id="slide-vol" min="0" max="1" step="0.05" value="0.8">
+    </span>
+    <button class="slide-ctrl" id="slide-kb" title="Ken Burns zoom">✨</button>
+    <div class="slide-sep"></div>
+    <button class="slide-ctrl" id="slide-exit" title="Exit (Esc)">✕</button>
+  </div>
+</div>
+<audio id="slide-audio"></audio>
+
+<div id="bottom-bar">
+  <div id="bar-left">
+    <button id="btn-albums" title="Switch album">⇆ Albums</button>
+    <span id="album-name" title="Click to rename album"></span>
+    <span id="bar-tools">
+      <input type="color" id="bg-color" value="#111111" title="Background color">
+      <button class="tool-btn" id="btn-add-photos" title="Add photos">＋ Photos</button>
+      <button class="tool-btn" id="btn-music" title="Background music">♪ Music</button>
+      <button class="tool-btn" id="btn-slideshow" title="Start slideshow">▶ Slideshow</button>
+      <button class="tool-btn" id="btn-fullscreen" title="Toggle full screen (F)">⛶</button>
+    </span>
+  </div>
+  <span id="status">Page</span>
+  <div id="page-info">
+    <button class="nav-btn" id="btn-left">&#9664;</button>
+    <span id="lbl-at">1</span>
+    <span>/</span>
+    <span id="lbl-total">1</span>
+    <button class="nav-btn" id="btn-right">&#9654;</button>
+  </div>
+</div>
+
+<!-- ── Music popover ── -->
+<div id="music-pop">
+  <div class="music-pop-title">Background Music</div>
+  <div id="music-list"></div>
+  <button class="tool-btn" id="music-add-btn">＋ Add music…</button>
+</div>
+
+<script>
+  // ── Path → file:// URL (handles spaces & special chars) ──────────
+  function fileURL(p) {
+    return 'file://' + p.split('/').map(encodeURIComponent).join('/');
+  }
+  function baseName(p) {
+    const b = p.split('/').pop();
+    return b.replace(/\.[^.]+$/, '');
+  }
+  // Size of an image (natW×natH) scaled to fit inside a box, preserving aspect.
+  function containSize(natW, natH, boxW, boxH) {
+    const s = Math.min(boxW / (natW || 1), boxH / (natH || 1));
+    return { w: (natW || 1) * s, h: (natH || 1) * s };
+  }
+  // Where a thumbnail's image is actually drawn inside its cell — contained,
+  // top-aligned, horizontally centered (matching `object-position: top`).
+  // Used so the fly-open/collapse animation lands exactly on the thumbnail.
+  function alignedImageRect(cell, natW, natH) {
+    const fit = containSize(natW, natH, cell.width, cell.height);
+    return { left: cell.left + (cell.width - fit.w) / 2, top: cell.top, width: fit.w, height: fit.h };
+  }
+
+  const COLS = 5;
+  const ROWS = 4;
+  const PER_PAGE = COLS * ROWS;
+
+  // ── State ───────────────────────────────────────────────────────
+  let photos       = [];   // [{ path, name }]
+  let currentAlbum = null; // { name, filename }
+  let currentPage  = 1;
+  let totalPages   = 1;
+  let expanded     = null;
+  let bgColor      = '#111111';
+  let music        = [];   // [{ path, name }]
+  let slideSeconds = 4.5;  // seconds per slide
+  let shuffle      = false;
+  let volume       = 0.8;  // music volume 0..1
+  let kenBurns     = true;
+  let photoDragIdx = null; // index being dragged during photo reorder
+
+  // Warm the full-resolution image into the browser's decode cache so that the
+  // click-to-expand grow is sharp from the first frame (see handleThumbClick).
+  const preloaded = new Set();
+  function preloadFull(p) {
+    if (preloaded.has(p)) return;
+    preloaded.add(p);
+    const im = new Image();
+    im.src = fileURL(p);
+    if (im.decode) im.decode().catch(() => {});
+  }
+
+  // ── DOM ─────────────────────────────────────────────────────────
+  const gallery    = document.getElementById('gallery');
+  const galleryEmpty = document.getElementById('gallery-empty');
+  const flyer      = document.getElementById('flyer');
+  const lblAt      = document.getElementById('lbl-at');
+  const lblTotal   = document.getElementById('lbl-total');
+  const statusEl   = document.getElementById('status');
+  const albumNameEl= document.getElementById('album-name');
+
+  // ── Render ──────────────────────────────────────────────────────
+  function renderPage(page) {
+    totalPages = Math.max(1, Math.ceil(photos.length / PER_PAGE));
+    currentPage = Math.min(Math.max(1, page), totalPages);
+
+    gallery.innerHTML = '';
+    galleryEmpty.classList.toggle('show', photos.length === 0);
+
+    const start = (currentPage - 1) * PER_PAGE;
+    const slice = photos.slice(start, start + PER_PAGE);
+
+    gallery.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+
+    slice.forEach((photo, i) => {
+      const globalIdx = start + i;
+      const div = document.createElement('div');
+      div.className = 'thumb';
+      div.dataset.idx = globalIdx;
+
+      const img = document.createElement('img');
+      img.alt = photo.name || '';
+      img.draggable = false;
+      // Load a cached thumbnail (fast/light); fall back to the original if it fails.
+      // A load error means the file is gone → show the "missing" placeholder.
+      img.addEventListener('error', () => { div.classList.add('thumb-missing'); img.style.display = 'none'; });
+      window.electronAPI.getThumb(photo.path).then(tp => {
+        img.src = tp ? fileURL(tp) : fileURL(photo.path);
+      });
+
+      const del = document.createElement('button');
+      del.className = 'thumb-del';
+      del.textContent = '✕';
+      del.title = 'Remove from album (does not delete the file)';
+      del.addEventListener('click', e => { e.stopPropagation(); removePhoto(globalIdx); });
+
+      div.appendChild(img);
+      div.appendChild(del);
+      div.addEventListener('click', () => handleThumbClick(globalIdx, div));
+      div.addEventListener('mouseenter', () => preloadFull(photo.path));   // warm the full-res for a sharp expand
+
+      // ── Drag to reorder photos within the album ──
+      div.draggable = true;
+      div.addEventListener('dragstart', e => { photoDragIdx = globalIdx; div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      div.addEventListener('dragend',   () => { photoDragIdx = null; div.classList.remove('dragging'); });
+      div.addEventListener('dragover',  e => { e.preventDefault(); if (photoDragIdx !== null && photoDragIdx !== globalIdx) div.classList.add('drag-over'); });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', async e => {
+        e.preventDefault();
+        e.stopPropagation();               // don't also trigger the gallery-area drop
+        div.classList.remove('drag-over');
+        if (photoDragIdx === null || photoDragIdx === globalIdx) return;
+        const [moved] = photos.splice(photoDragIdx, 1);
+        photos.splice(globalIdx, 0, moved);
+        photoDragIdx = null;
+        await saveAlbum();
+        renderPage(currentPage);
+      });
+
+      gallery.appendChild(div);
+    });
+
+    lblAt.textContent    = currentPage;
+    lblTotal.textContent = totalPages;
+    statusEl.textContent = 'Page';
+  }
+
+  // ── Thumb click: expand ─────────────────────────────────────────
+  function handleThumbClick(idx, thumbEl) {
+    if (expanded) return;
+
+    const rect = thumbEl.getBoundingClientRect();
+
+    document.querySelectorAll('.thumb').forEach(t => t.classList.add('faded'));
+
+    // Start with whatever the thumbnail is already showing (instant), then swap
+    // to the decoded full-resolution image so the grow stays sharp — no blur, no
+    // reload flash. This mirrors the old Flash trick of scaling one bitmap up.
+    const thumbImg = thumbEl.querySelector('img');
+    const fullURL  = fileURL(photos[idx].path);
+    flyer.src = (thumbImg && thumbImg.src) ? thumbImg.src : fullURL;
+    // Start exactly on the thumbnail's drawn image rect so there's no jump.
+    const nW = (thumbImg && thumbImg.naturalWidth)  || 0;
+    const nH = (thumbImg && thumbImg.naturalHeight) || 0;
+    const startR = nW && nH ? alignedImageRect(rect, nW, nH) : rect;
+    flyer.style.transition = 'none';
+    flyer.style.left   = startR.left   + 'px';
+    flyer.style.top    = startR.top    + 'px';
+    flyer.style.width  = startR.width  + 'px';
+    flyer.style.height = startR.height + 'px';
+    flyer.style.display = 'block';
+
+    const areaH = document.getElementById('gallery-area').clientHeight;
+    const areaW = window.innerWidth;
+    const maxW  = areaW * 0.95;
+    const maxH  = areaH * 0.95;
+
+    expanded = { idx, thumbEl, rect };
+
+    const full = new Image();
+    full.src = fullURL;
+    (full.decode ? full.decode() : Promise.resolve()).catch(() => {}).then(() => {
+      if (expanded && expanded.idx === idx) flyer.src = fullURL;  // swap in full quality
+    });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        flyer.style.transition = 'left 0.4s ease, top 0.4s ease, width 0.4s ease, height 0.4s ease';
+        flyer.style.width  = maxW + 'px';
+        flyer.style.height = maxH + 'px';
+        flyer.style.left   = (areaW - maxW) / 2 + 'px';
+        flyer.style.top    = (areaH - maxH) / 2 + 'px';
+      });
+    });
+
+    statusEl.textContent = 'Photo';
+    lblAt.textContent    = idx + 1;
+    lblTotal.textContent = photos.length;
+  }
+
+  // ── Cycle to next/prev photo while expanded ─────────────────────
+  function cyclePhoto(delta) {
+    if (!expanded) return;
+    let next = expanded.idx + delta;
+    if (next < 0) next = photos.length - 1;
+    if (next >= photos.length) next = 0;
+
+    expanded.idx = next;
+    flyer.src = fileURL(photos[next].path);
+    lblAt.textContent = next + 1;
+  }
+
+  // ── Flyer click: collapse back to thumbnail ─────────────────────
+  flyer.addEventListener('click', () => {
+    if (!expanded) return;
+
+    const targetIdx  = expanded.idx;
+    const targetPage = Math.ceil((targetIdx + 1) / PER_PAGE);
+
+    if (targetPage !== currentPage) {
+      currentPage = targetPage;
+      renderPage(currentPage);
+    }
+
+    const thumbEl = document.querySelector(`.thumb[data-idx="${targetIdx}"]`);
+    const cell    = thumbEl ? thumbEl.getBoundingClientRect() : expanded.rect;
+
+    // Collapse to the thumbnail's *image* rect (contained, top-aligned, centered)
+    // so it lands exactly on the thumbnail — no jump on the final swap.
+    const r = alignedImageRect(cell, flyer.naturalWidth, flyer.naturalHeight);
+    flyer.style.left   = r.left   + 'px';
+    flyer.style.top    = r.top    + 'px';
+    flyer.style.width  = r.width  + 'px';
+    flyer.style.height = r.height + 'px';
+
+    flyer.addEventListener('transitionend', function restore() {
+      flyer.removeEventListener('transitionend', restore);
+      flyer.style.display = 'none';
+      flyer.src = '';
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('faded'));
+      expanded = null;
+      statusEl.textContent = 'Page';
+      lblAt.textContent    = currentPage;
+      lblTotal.textContent = totalPages;
+    }, { once: true });
+  });
+
+  // ── Page navigation ─────────────────────────────────────────────
+  function goToPage(page) {
+    if (page < 1 || page > totalPages || expanded) return;
+    renderPage(page);
+  }
+
+  const btnLeft  = document.getElementById('btn-left');
+  const btnRight = document.getElementById('btn-right');
+  btnLeft.addEventListener('click',  () => { expanded ? cyclePhoto(-1) : goToPage(currentPage - 1); });
+  btnRight.addEventListener('click', () => { expanded ? cyclePhoto(1)  : goToPage(currentPage + 1); });
+
+  // Move a photo so its FINAL index is toIdx (clamped). Returns the final index.
+  function movePhoto(fromIdx, toIdx) {
+    if (fromIdx < 0 || fromIdx >= photos.length) return -1;
+    const [m] = photos.splice(fromIdx, 1);
+    toIdx = Math.max(0, Math.min(toIdx, photos.length));
+    photos.splice(toIdx, 0, m);
+    return toIdx;
+  }
+
+  // ── Cross-page reorder: drop a dragged photo onto the ◀/▶ arrow to send it
+  //    to the previous/next page (no mid-drag DOM rebuild → reliable). ──
+  async function moveDraggedToPage(dir) {
+    if (photoDragIdx === null) return;
+    let target;
+    if (dir > 0) target = (currentPage >= totalPages) ? photos.length : currentPage * PER_PAGE;         // start of next page
+    else         target = (currentPage <= 1) ? 0 : (currentPage - 1) * PER_PAGE - 1;                    // end of previous page
+    const landed = movePhoto(photoDragIdx, target);
+    photoDragIdx = null;
+    if (landed < 0) return;
+    await saveAlbum();
+    renderPage(Math.floor(landed / PER_PAGE) + 1);     // show the page it landed on
+  }
+
+  [[btnLeft, -1], [btnRight, 1]].forEach(([btn, dir]) => {
+    btn.addEventListener('dragover',  e => { if (photoDragIdx !== null) e.preventDefault(); });
+    btn.addEventListener('dragenter', e => { if (photoDragIdx !== null) { e.preventDefault(); btn.classList.add('drag-target'); } });
+    btn.addEventListener('dragleave', () => btn.classList.remove('drag-target'));
+    btn.addEventListener('drop',      async e => { e.preventDefault(); e.stopPropagation(); btn.classList.remove('drag-target'); await moveDraggedToPage(dir); });
+  });
+
+  // Safety net: always clear drag state when a drag ends anywhere.
+  document.addEventListener('dragend', () => {
+    photoDragIdx = null;
+    dragDepth = 0;
+    dropOverlay.classList.remove('active');
+    document.querySelectorAll('.thumb.dragging, .thumb.drag-over').forEach(t => t.classList.remove('dragging', 'drag-over'));
+    document.querySelectorAll('.nav-btn.drag-target').forEach(b => b.classList.remove('drag-target'));
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!launchScreen.classList.contains('hidden')) return; // ignore in launcher
+    if (slideState.on) return; // slideshow has its own key handling
+    if (e.key === 'ArrowRight') expanded ? cyclePhoto(1)  : goToPage(currentPage + 1);
+    if (e.key === 'ArrowLeft')  expanded ? cyclePhoto(-1) : goToPage(currentPage - 1);
+    if (e.key === 'Escape' && expanded) flyer.click();
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  //  LAUNCH SCREEN
+  // ════════════════════════════════════════════════════════════════
+  const launchScreen   = document.getElementById('launch-screen');
+  const launchList     = document.getElementById('launch-list');
+  const launchNewInput = document.getElementById('launch-new-input');
+  const launchCreateBtn= document.getElementById('launch-create-btn');
+  const launchCancelBtn= document.getElementById('launch-cancel-btn');
+
+  function fmtDate(ms) {
+    return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function showLauncher() {
+    closeMusicPop();
+    launchScreen.classList.remove('hidden');
+    launchNewInput.value = '';
+    launchCancelBtn.style.display = currentAlbum ? 'flex' : 'none';
+    await refreshAlbumList();
+  }
+  launchCancelBtn.addEventListener('click', () => { if (currentAlbum) launchScreen.classList.add('hidden'); });
+
+  async function refreshAlbumList() {
+    const albums = await window.electronAPI.listAlbums();
+    launchList.innerHTML = '';
+
+    if (!albums.length) {
+      launchList.innerHTML = '<div id="launch-empty">No albums yet — create one below.</div>';
+      return;
+    }
+
+    albums.forEach(a => {
+      const item = document.createElement('div');
+      item.className = 'album-item';
+      item.dataset.filename = a.filename;
+      item.innerHTML = `
+        <img class="album-item-icon" src="album-icon.png" alt="">
+
+        <span class="album-item-name"></span>
+        <span class="album-item-meta">${a.count} photo${a.count === 1 ? '' : 's'}</span>
+        <button class="album-rename" title="Rename">✎</button>
+        <button class="album-del" title="Delete">✕</button>
+      `;
+      item.querySelector('.album-item-name').textContent = a.name;
+
+      item.addEventListener('click', e => {
+        if (e.target.closest('.album-del, .album-rename')) return;
+        openAlbum(a);
+      });
+      item.querySelector('.album-rename').addEventListener('click', e => {
+        e.stopPropagation();
+        // Inline edit (Electron disables window.prompt, so we edit in place).
+        const nameSpan = item.querySelector('.album-item-name');
+        const input = document.createElement('input');
+        input.className = 'album-rename-input';
+        input.value = a.name;
+        nameSpan.replaceWith(input);
+        input.focus(); input.select();
+
+        let done = false;
+        async function commit(save) {
+          if (done) return; done = true;
+          const name = input.value.trim();
+          if (save && name && name !== a.name) {
+            const newFilename = await window.electronAPI.renameAlbum(a.filename, name);
+            if (newFilename && currentAlbum?.filename === a.filename) {
+              currentAlbum = { name, filename: newFilename };
+              albumNameEl.textContent = name;
+            }
+          }
+          await refreshAlbumList();
+        }
+        input.addEventListener('click',   ev => ev.stopPropagation());  // don't open the album
+        input.addEventListener('keydown', ev => {
+          ev.stopPropagation();
+          if (ev.key === 'Enter')  commit(true);
+          if (ev.key === 'Escape') commit(false);
+        });
+        input.addEventListener('blur', () => commit(true));
+      });
+      item.querySelector('.album-del').addEventListener('click', async e => {
+        e.stopPropagation();
+        if (!confirm(`Delete album "${a.name}"? (photos on disk are not touched)`)) return;
+        await window.electronAPI.deleteAlbum(a.filename);
+        await refreshAlbumList();
+      });
+
+      launchList.appendChild(item);
+    });
+  }
+
+  async function openAlbum(a) {
+    const saved = await window.electronAPI.loadAlbum(a.filename);
+    const displayName = saved?.albumName || a.name;
+    currentAlbum = { name: displayName, filename: a.filename };
+    photos = Array.isArray(saved?.photos) ? saved.photos.slice() : [];
+    music  = Array.isArray(saved?.music)  ? saved.music.slice()  : [];
+    bgColor = saved?.bgColor || '#111111';
+    slideSeconds = saved?.slideSeconds ?? 4.5;
+    shuffle      = saved?.shuffle ?? false;
+    volume       = saved?.volume ?? 0.8;
+    kenBurns     = saved?.kenBurns ?? true;
+
+    albumNameEl.textContent = displayName;
+    applyBg(bgColor);
+    updateMusicBtn();
+    syncSlideControls();
+    hideNotice();
+    launchScreen.classList.add('hidden');
+    expanded = null;
+    flyer.style.display = 'none';
+    renderPage(1);
+    checkMissing();
+  }
+
+  // ── Dismissible notice toast ────────────────────────────────────
+  const notice       = document.getElementById('notice');
+  const noticeText   = document.getElementById('notice-text');
+  const noticeAction = document.getElementById('notice-action');
+  let noticeFn = null;
+  function showNotice(text, actionLabel, fn) {
+    noticeText.textContent = text;
+    if (actionLabel && fn) {
+      noticeAction.textContent = actionLabel;
+      noticeAction.style.display = '';
+      noticeFn = fn;
+    } else {
+      noticeAction.style.display = 'none';
+      noticeFn = null;
+    }
+    notice.classList.add('show');
+  }
+  function hideNotice() { notice.classList.remove('show'); noticeFn = null; }
+  document.getElementById('notice-close').addEventListener('click', hideNotice);
+  noticeAction.addEventListener('click', () => { const fn = noticeFn; hideNotice(); if (fn) fn(); });
+
+  // Warn (dismissibly) when an album references files that are gone from disk.
+  async function checkMissing() {
+    if (!photos.length) return;
+    const oks = await Promise.all(photos.map(p => window.electronAPI.fileExists(p.path)));
+    const missing = photos.filter((_, i) => !oks[i]);
+    if (!missing.length) return;
+    const n = missing.length;
+    showNotice(
+      `${n} photo${n > 1 ? 's are' : ' is'} missing (moved or deleted from disk).`,
+      `Remove ${n > 1 ? 'them' : 'it'}`,
+      async () => {
+        const gone = new Set(missing.map(m => m.path));
+        photos = photos.filter(p => !gone.has(p.path));
+        await saveAlbum();
+        renderPage(currentPage);
+      }
+    );
+  }
+
+  async function createAndOpen(name) {
+    const filename = await window.electronAPI.createAlbum(name);
+    if (filename) await openAlbum({ name, filename });
+    return filename;
+  }
+
+  launchCreateBtn.addEventListener('click', async () => {
+    const name = launchNewInput.value.trim();
+    if (!name) { launchNewInput.focus(); return; }
+    await createAndOpen(name);
+  });
+  launchNewInput.addEventListener('keydown', e => { if (e.key === 'Enter') launchCreateBtn.click(); });
+
+  document.getElementById('btn-albums').addEventListener('click', showLauncher);
+
+  // ── Rename the open album (click its name in the bottom bar) ─────
+  albumNameEl.addEventListener('click', () => {
+    if (!currentAlbum) return;
+    const input = document.createElement('input');
+    input.id = 'album-name-input';
+    input.value = currentAlbum.name;
+    albumNameEl.replaceWith(input);
+    input.focus(); input.select();
+
+    async function commit(save) {
+      const name = input.value.trim();
+      if (save && name && name !== currentAlbum.name) {
+        const newFilename = await window.electronAPI.renameAlbum(currentAlbum.filename, name);
+        if (newFilename) currentAlbum = { name, filename: newFilename };
+        else alert('Could not rename (name may already be in use).');
+      }
+      albumNameEl.textContent = currentAlbum.name;
+      input.replaceWith(albumNameEl);
+    }
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') commit(true);
+      else if (e.key === 'Escape') commit(false);
+    });
+    input.addEventListener('blur', () => commit(true));
+  });
+
+  // ── Save current album ──────────────────────────────────────────
+  async function saveAlbum() {
+    if (!currentAlbum) return;
+    await window.electronAPI.saveData({ albumName: currentAlbum.name, photos, bgColor, music, slideSeconds, shuffle, volume, kenBurns });
+  }
+
+  // ── Add photos (dedupe by path) ─────────────────────────────────
+  async function addPhotos(paths) {
+    const have = new Set(photos.map(p => p.path));
+    const added = paths.filter(p => !have.has(p)).map(p => ({ path: p, name: baseName(p) }));
+    if (!added.length) return 0;
+    photos = photos.concat(added);
+    await saveAlbum();
+    renderPage(currentPage);
+    return added.length;
+  }
+
+  // ── Add photos via the file picker ──────────────────────────────
+  async function addPhotosViaDialog() {
+    if (!currentAlbum) return;
+    const paths = await window.electronAPI.openPhotosDialog();
+    if (paths.length) await addPhotos(paths);
+  }
+  document.getElementById('btn-add-photos').addEventListener('click', addPhotosViaDialog);
+
+  // ── Remove a photo from the album (leaves the file on disk) ──────
+  async function removePhoto(idx) {
+    if (idx < 0 || idx >= photos.length) return;
+    photos.splice(idx, 1);
+    await saveAlbum();
+    renderPage(currentPage);   // renderPage re-clamps the page if it emptied
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  DRAG & DROP
+  // ════════════════════════════════════════════════════════════════
+  // Launch-screen drop zone (creates/loads an album from a folder)
+  const launchDropZone = document.getElementById('launch-drop-zone');
+  const launchDropText = document.getElementById('launch-drop-text');
+  const DROP_DEFAULT   = 'Drop a folder of photos — or click to choose';
+
+  launchDropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    launchDropZone.classList.add('drag-over');
+    launchDropText.textContent = 'Drop to scan folder';
+  });
+  launchDropZone.addEventListener('dragleave', () => {
+    launchDropZone.classList.remove('drag-over');
+    launchDropText.textContent = DROP_DEFAULT;
+  });
+  launchDropZone.addEventListener('drop', async e => {
+    e.preventDefault();
+    launchDropZone.classList.remove('drag-over');
+    const paths = [...e.dataTransfer.files].map(f => f.path).filter(Boolean);
+    await scanIntoNewAlbum(paths);
+  });
+  launchDropZone.addEventListener('click', async () => {
+    const paths = await window.electronAPI.openFolderDialog();
+    if (paths.length) await scanIntoNewAlbum(paths);
+  });
+
+  async function scanIntoNewAlbum(paths) {
+    if (!paths.length) return;
+    launchDropZone.classList.add('scanning');
+    launchDropText.textContent = 'Scanning…';
+
+    const found = await window.electronAPI.scanPaths(paths);
+
+    launchDropZone.classList.remove('scanning');
+    launchDropText.textContent = DROP_DEFAULT;
+
+    if (!found.length) { launchDropText.textContent = 'No photos found in that folder'; return; }
+
+    // Name: typed name, else the dropped folder's name, else "Album"
+    const name = launchNewInput.value.trim() || paths[0].split('/').pop() || 'Album';
+    const filename = await createAndOpen(name);
+    if (filename) await addPhotos(found);
+  }
+
+  // Gallery drop (adds to the open album)
+  const galleryArea  = document.getElementById('gallery-area');
+  const dropOverlay  = document.getElementById('drop-overlay');
+  let dragDepth = 0;
+
+  galleryArea.addEventListener('dragenter', e => {
+    e.preventDefault();
+    if (!currentAlbum) return;
+    if (photoDragIdx !== null) return;   // internal reorder — not an "add photos" drop
+    dragDepth++;
+    dropOverlay.classList.add('active');
+  });
+  galleryArea.addEventListener('dragover', e => e.preventDefault());
+  galleryArea.addEventListener('dragleave', e => {
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) dropOverlay.classList.remove('active');
+  });
+  galleryArea.addEventListener('drop', async e => {
+    e.preventDefault();
+    dragDepth = 0;
+    dropOverlay.classList.remove('active');
+    if (!currentAlbum) return;
+    const paths = [...e.dataTransfer.files].map(f => f.path).filter(Boolean);
+    if (!paths.length) {
+      // Internal reorder dropped on empty space → make it the last photo on this page.
+      if (photoDragIdx !== null) {
+        const landed = movePhoto(photoDragIdx, Math.min(currentPage * PER_PAGE, photos.length) - 1);
+        photoDragIdx = null;
+        if (landed >= 0) { await saveAlbum(); renderPage(Math.floor(landed / PER_PAGE) + 1); }
+      }
+      return;
+    }
+    // Dropped audio files become background music; everything else is scanned for photos.
+    const audio = paths.filter(p => AUDIO_EXT.has(p.split('.').pop().toLowerCase()));
+    const rest  = paths.filter(p => !AUDIO_EXT.has(p.split('.').pop().toLowerCase()));
+    if (audio.length) await addMusic(audio);
+    if (rest.length) {
+      const found = await window.electronAPI.scanPaths(rest);
+      await addPhotos(found);
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  //  BACKGROUND COLOR
+  // ════════════════════════════════════════════════════════════════
+  const bgColorInput = document.getElementById('bg-color');
+
+  function applyBg(color) {
+    bgColor = color || '#111111';
+    document.body.style.background = bgColor;
+    bgColorInput.value = bgColor;
+  }
+  bgColorInput.addEventListener('input',  () => applyBg(bgColorInput.value));
+  bgColorInput.addEventListener('change', () => saveAlbum());   // persist once the picker closes
+
+  // ════════════════════════════════════════════════════════════════
+  //  FULL SCREEN
+  // ════════════════════════════════════════════════════════════════
+  document.getElementById('btn-fullscreen').addEventListener('click', () => window.electronAPI.toggleFullscreen());
+  document.addEventListener('keydown', e => {
+    // "F" toggles app full screen (ignore while typing or in the launcher)
+    if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey
+        && launchScreen.classList.contains('hidden')
+        && !slideState.on
+        && !(document.activeElement && document.activeElement.tagName === 'INPUT')) {
+      window.electronAPI.toggleFullscreen();
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  //  MUSIC
+  // ════════════════════════════════════════════════════════════════
+  const AUDIO_EXT = new Set(['mp3', 'm4a', 'wav', 'ogg', 'aac', 'flac', 'aiff', 'aif']);
+  const btnMusic  = document.getElementById('btn-music');
+  const musicPop  = document.getElementById('music-pop');
+  const musicList = document.getElementById('music-list');
+
+  function updateMusicBtn() {
+    btnMusic.textContent = music.length ? `♪ ${music.length}` : '♪ Music';
+    btnMusic.title = 'Background music';
+  }
+
+  async function addMusic(paths) {
+    const have = new Set(music.map(m => m.path));
+    const added = paths.filter(p => !have.has(p)).map(p => ({ path: p, name: baseName(p) }));
+    if (!added.length) return;
+    music = music.concat(added);
+    await saveAlbum();
+    updateMusicBtn();
+    renderMusicList();
+  }
+
+  async function removeMusic(i) {
+    if (i < 0 || i >= music.length) return;
+    music.splice(i, 1);
+    await saveAlbum();
+    updateMusicBtn();
+    renderMusicList();
+  }
+
+  let musicDragIdx = null;
+
+  function renderMusicList() {
+    musicList.innerHTML = '';
+    if (!music.length) {
+      musicList.innerHTML = '<div class="music-empty">No music yet — add tracks below.</div>';
+      return;
+    }
+    music.forEach((m, i) => {
+      const row = document.createElement('div');
+      row.className = 'music-row';
+      row.draggable = true;
+      row.dataset.i = i;
+      row.innerHTML = `<span class="music-grip" title="Drag to reorder">⠿</span><span class="music-row-ico">♪</span><span class="music-row-name"></span><button class="music-row-del" title="Remove">✕</button>`;
+      row.querySelector('.music-row-name').textContent = `${i + 1}. ${m.name}`;
+      row.querySelector('.music-row-del').addEventListener('click', () => removeMusic(i));
+
+      // ── Drag to reorder (top of the list plays first) ──
+      row.addEventListener('dragstart', e => { musicDragIdx = i; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      row.addEventListener('dragend',   () => { musicDragIdx = null; row.classList.remove('dragging'); });
+      row.addEventListener('dragover',  e => { e.preventDefault(); if (musicDragIdx !== i) row.classList.add('drag-over'); });
+      row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+      row.addEventListener('drop', async e => {
+        e.preventDefault();
+        row.classList.remove('drag-over');
+        if (musicDragIdx === null || musicDragIdx === i) return;
+        const [moved] = music.splice(musicDragIdx, 1);
+        music.splice(i, 0, moved);
+        musicDragIdx = null;
+        await saveAlbum();
+        renderMusicList();
+      });
+
+      musicList.appendChild(row);
+    });
+  }
+
+  // ── Music popover ──
+  function openMusicPop() {
+    renderMusicList();
+    const r = btnMusic.getBoundingClientRect();
+    musicPop.style.left = r.left + 'px';
+    musicPop.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    musicPop.classList.add('open');
+  }
+  function closeMusicPop() { musicPop.classList.remove('open'); }
+
+  btnMusic.addEventListener('click', e => {
+    if (!currentAlbum) return;
+    e.stopPropagation();
+    musicPop.classList.contains('open') ? closeMusicPop() : openMusicPop();
+  });
+  document.getElementById('music-add-btn').addEventListener('click', async e => {
+    e.stopPropagation();
+    const paths = await window.electronAPI.openMusicDialog();
+    if (paths.length) await addMusic(paths);
+  });
+  musicPop.addEventListener('click', e => e.stopPropagation());
+  // Click anywhere else closes the popover.
+  document.addEventListener('click', () => closeMusicPop());
+
+  // ════════════════════════════════════════════════════════════════
+  //  SLIDESHOW
+  // ════════════════════════════════════════════════════════════════
+  const slideshow    = document.getElementById('slideshow');
+  const slideA       = document.getElementById('slide-a');
+  const slideB       = document.getElementById('slide-b');
+  const slideCounter = document.getElementById('slide-counter');
+  const slideAudio   = document.getElementById('slide-audio');
+  const btnSlideshow = document.getElementById('btn-slideshow');
+  const btnPlayPause = document.getElementById('slide-playpause');
+  const btnShuffle   = document.getElementById('slide-shuffle');
+  const btnKb        = document.getElementById('slide-kb');
+  const speedSlider  = document.getElementById('slide-speed');
+  const speedLbl     = document.getElementById('slide-speed-lbl');
+  const volSlider    = document.getElementById('slide-vol');
+
+  // order[] is the playback sequence (shuffled or sequential); pos indexes into it.
+  const slideState = { on: false, timer: null, front: null, paused: false, musicIdx: 0,
+                       cursorTimer: null, order: [], pos: 0, prevFs: false,
+                       outroTimer: null, fadeInt: null };
+  const OUTRO_HOLD_MS = 5000;   // wait this long on the last slide…
+  const OUTRO_FADE_MS = 3000;   // …then fade the music out over this long
+
+  // Push current settings into the on-screen controls (called on album load).
+  function syncSlideControls() {
+    speedSlider.value = slideSeconds;
+    speedLbl.textContent = slideSeconds + 's';
+    volSlider.value = volume;
+    btnShuffle.classList.toggle('on', shuffle);
+    btnKb.classList.toggle('on', kenBurns);
+  }
+
+  function buildOrder(startIdx) {
+    const idxs = photos.map((_, i) => i);
+    if (shuffle) {
+      for (let i = idxs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+      }
+    }
+    slideState.order = idxs;
+    slideState.pos = Math.max(0, idxs.indexOf(startIdx));
+  }
+
+  function renderSlide() {
+    const idx = slideState.order[slideState.pos];
+    const back = (slideState.front === slideA) ? slideB : slideA;
+    const front = slideState.front;
+    back.src = fileURL(photos[idx].path);
+
+    // Ken Burns: restart a random zoom/pan on the incoming image.
+    back.style.animation = 'none';
+    back.style.transform = 'none';
+    if (kenBurns) {
+      void back.offsetWidth; // reflow so the animation restarts even on the same element
+      back.style.animation = `kb${Math.floor(Math.random() * 4)} ${(slideSeconds + 1.2).toFixed(1)}s ease-out forwards`;
+    }
+
+    back.classList.add('visible');
+    if (front && front !== back) front.classList.remove('visible');
+    slideState.front = back;
+    slideCounter.textContent = `${slideState.pos + 1} / ${photos.length}`;
+  }
+
+  function slideNext() { slideState.pos = (slideState.pos + 1) % slideState.order.length; renderSlide(); }
+  function slidePrev() { slideState.pos = (slideState.pos - 1 + slideState.order.length) % slideState.order.length; renderSlide(); }
+
+  function scheduleNext() {
+    clearTimeout(slideState.timer);
+    cancelMusicOutro();                 // any move cancels a pending fade & restores volume
+    if (slideState.paused) return;
+    // Reached the final slide: stop auto-advancing and start the music outro.
+    if (slideState.pos >= slideState.order.length - 1) { startMusicOutro(); return; }
+    slideState.timer = setTimeout(() => { slideNext(); scheduleNext(); }, slideSeconds * 1000);
+  }
+
+  // ── Music outro on the last slide: hold, then fade to silence ──
+  function startMusicOutro() {
+    clearTimeout(slideState.outroTimer); clearInterval(slideState.fadeInt);
+    if (!music.length) return;
+    slideState.outroTimer = setTimeout(() => fadeMusicOut(OUTRO_FADE_MS), OUTRO_HOLD_MS);
+  }
+  function fadeMusicOut(dur) {
+    clearInterval(slideState.fadeInt);
+    const startVol = slideAudio.volume;
+    const t0 = performance.now();
+    slideState.fadeInt = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / dur);
+      slideAudio.volume = startVol * (1 - p);
+      if (p >= 1) { clearInterval(slideState.fadeInt); slideState.fadeInt = null; slideAudio.pause(); }
+    }, 50);
+  }
+  function cancelMusicOutro() {
+    clearTimeout(slideState.outroTimer); slideState.outroTimer = null;
+    if (slideState.fadeInt) { clearInterval(slideState.fadeInt); slideState.fadeInt = null; }
+    slideAudio.volume = volume;         // restore in case a fade was mid-flight
+    if (slideState.on && !slideState.paused && music.length && slideAudio.paused) {
+      slideAudio.play().catch(() => {});
+    }
+  }
+
+  function startSlideshow() {
+    if (!photos.length) return;
+    closeMusicPop();
+    const startIdx = expanded ? expanded.idx : (currentPage - 1) * PER_PAGE;
+    if (expanded) {                       // clear any open single-photo view
+      flyer.style.display = 'none'; flyer.src = '';
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('faded'));
+      expanded = null;
+    }
+    slideState.on = true; slideState.paused = false;
+    slideA.classList.remove('visible'); slideB.classList.remove('visible');
+    slideA.src = ''; slideB.src = ''; slideState.front = null;
+    slideshow.style.background = bgColor || '#000';   // match the album's background
+    slideshow.classList.add('active');
+    btnPlayPause.textContent = '⏸';
+    syncSlideControls();
+    buildOrder(startIdx);
+    renderSlide();
+    scheduleNext();
+    playMusic();
+    armCursorHide();
+    // Go true full screen for the show; remember prior state to restore on exit.
+    window.electronAPI.setFullscreen(true).then(prev => { slideState.prevFs = prev; });
+  }
+
+  function stopSlideshow() {
+    slideState.on = false;
+    clearTimeout(slideState.timer);
+    clearTimeout(slideState.cursorTimer);
+    clearTimeout(slideState.outroTimer);
+    if (slideState.fadeInt) { clearInterval(slideState.fadeInt); slideState.fadeInt = null; }
+    slideshow.classList.remove('active', 'show-cursor');
+    slideAudio.pause(); slideAudio.src = ''; slideAudio.volume = volume; // reset for next time
+    if (!slideState.prevFs) window.electronAPI.setFullscreen(false); // only exit if we entered it
+  }
+
+  function togglePause() {
+    slideState.paused = !slideState.paused;
+    btnPlayPause.textContent = slideState.paused ? '▶' : '⏸';
+    if (slideState.paused) { clearTimeout(slideState.timer); slideAudio.pause(); }
+    else { scheduleNext(); if (music.length) slideAudio.play().catch(() => {}); }
+  }
+
+  // ── Slideshow settings (live + persisted) ──
+  function setSpeed(sec) {
+    slideSeconds = sec;
+    speedLbl.textContent = sec + 's';
+    if (slideState.on && !slideState.paused) scheduleNext(); // apply new timing immediately
+    saveAlbum();
+  }
+  function setShuffle(on) {
+    shuffle = on;
+    btnShuffle.classList.toggle('on', shuffle);
+    if (slideState.on) {                    // reshuffle but keep the current photo showing
+      const currentIdx = slideState.order[slideState.pos];
+      buildOrder(currentIdx);
+    }
+    saveAlbum();
+  }
+  function setVolume(v) {
+    volume = v;
+    slideAudio.volume = v;
+    saveAlbum();
+  }
+  function setKenBurns(on) {
+    kenBurns = on;
+    btnKb.classList.toggle('on', kenBurns);
+    if (!on) { [slideA, slideB].forEach(el => { el.style.animation = 'none'; el.style.transform = 'none'; }); }
+    else if (slideState.on) renderSlide();  // kick off the effect on the current slide
+    saveAlbum();
+  }
+
+  // Background music — plays the album's tracks in sequence, looping.
+  function playMusic() {
+    slideAudio.volume = volume;
+    if (!music.length) return;
+    slideState.musicIdx = 0;
+    slideAudio.src = fileURL(music[0].path);
+    slideAudio.play().catch(() => {});
+  }
+  slideAudio.addEventListener('ended', () => {
+    if (!music.length || !slideState.on) return;
+    slideState.musicIdx = (slideState.musicIdx + 1) % music.length;
+    slideAudio.src = fileURL(music[slideState.musicIdx].path);
+    slideAudio.play().catch(() => {});
+  });
+
+  // Auto-hide cursor + controls after a moment of no movement.
+  function armCursorHide() {
+    slideshow.classList.add('show-cursor');
+    clearTimeout(slideState.cursorTimer);
+    slideState.cursorTimer = setTimeout(() => slideshow.classList.remove('show-cursor'), 2500);
+  }
+  slideshow.addEventListener('mousemove', () => { if (slideState.on) armCursorHide(); });
+
+  btnSlideshow.addEventListener('click', startSlideshow);
+  btnShuffle.addEventListener('click', () => setShuffle(!shuffle));
+  btnKb.addEventListener('click', () => setKenBurns(!kenBurns));
+  document.getElementById('slide-prev').addEventListener('click', () => { slidePrev(); scheduleNext(); });
+  document.getElementById('slide-next').addEventListener('click', () => { slideNext(); scheduleNext(); });
+  btnPlayPause.addEventListener('click', togglePause);
+  document.getElementById('slide-exit').addEventListener('click', stopSlideshow);
+  speedSlider.addEventListener('input', () => setSpeed(parseFloat(speedSlider.value)));
+  volSlider.addEventListener('input',   () => setVolume(parseFloat(volSlider.value)));
+
+  document.addEventListener('keydown', e => {
+    if (!slideState.on) return;
+    // Let a focused slider handle its own arrow keys.
+    const onSlider = document.activeElement && document.activeElement.type === 'range';
+    if (e.key === 'Escape')      stopSlideshow();
+    else if (e.key === 'ArrowRight' && !onSlider) { slideNext(); scheduleNext(); }
+    else if (e.key === 'ArrowLeft'  && !onSlider) { slidePrev(); scheduleNext(); }
+    else if (e.key === ' ')      { e.preventDefault(); togglePause(); }
+  });
+
+  // ── Init ────────────────────────────────────────────────────────
+  showLauncher();
+</script>
+</body>
+</html>

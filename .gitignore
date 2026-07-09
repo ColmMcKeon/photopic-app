@@ -1,0 +1,7 @@
+node_modules/
+*.app/
+Photopic-darwin-arm64/
+*.iconset/
+data/
+.thumbs/
+.DS_Store

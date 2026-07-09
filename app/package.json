@@ -1,0 +1,14 @@
+{
+  "name": "photopic",
+  "version": "1.0.0",
+  "description": "Photopic — modern photo gallery",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Photopic --platform=darwin --overwrite --icon=icon.icns --asar --app-bundle-id=com.colmmckeon.photopic && codesign --force --deep --sign - Photopic-darwin-arm64/Photopic.app && rm -rf ../Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app ../Photopic.app && rm -rf /Applications/Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app /Applications/Photopic.app"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}
