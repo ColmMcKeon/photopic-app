@@ -12,10 +12,18 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 // Album data lives at …/claude-workspace/photopic/data.
 // In dev (`npm start`) __dirname is …/photopic/app, so the relative path
-// resolves there. In a packaged .app __dirname is inside the read-only bundle,
-// so fall back to the fixed workspace path — both point at the same library.
+// resolves there.
 const WORKSPACE_DATA = path.join(os.homedir(), 'Library', 'CloudStorage', 'OneDrive-Adobe', 'Work', 'Development', 'claude-workspace', 'photopic', 'data');
-const DATA_DIR = app.isPackaged ? WORKSPACE_DATA : path.join(__dirname, '..', 'data');
+
+// Packaged installs downloaded by anyone else get their data under one shared,
+// easy-to-find home instead of being buried in ~/Library: Documents/Electron App Data/Photopic/data.
+const SHARED_APP_DATA = path.join(app.getPath('documents'), 'Electron App Data', 'Photopic', 'data');
+
+// On Colm's own machine the OneDrive library already exists, so packaged
+// builds keep using it there; everyone else's install gets the Documents folder.
+const DATA_DIR = !app.isPackaged
+  ? path.join(__dirname, '..', 'data')
+  : fs.existsSync(WORKSPACE_DATA) ? WORKSPACE_DATA : SHARED_APP_DATA;
 const THUMB_DIR = path.join(DATA_DIR, '.thumbs');
 const THUMB_SIZE = 600; // max long-edge px for cached grid thumbnails
 
