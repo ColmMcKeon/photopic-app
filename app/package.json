@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . Photopic --platform=darwin --overwrite --icon=icon.icns --asar --app-bundle-id=com.colmmckeon.photopic && codesign --force --deep --sign - Photopic-darwin-arm64/Photopic.app && rm -rf ../Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app ../Photopic.app && rm -rf /Applications/Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app /Applications/Photopic.app"
+    "build": "electron-packager . Photopic --platform=darwin --overwrite --icon=icon.icns --asar --app-bundle-id=com.colmmckeon.photopic && node scripts/clean-privacy-keys.js Photopic-darwin-arm64/Photopic.app && codesign --force --deep --sign - Photopic-darwin-arm64/Photopic.app && rm -rf ../Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app ../Photopic.app && rm -rf /Applications/Photopic.app && cp -R Photopic-darwin-arm64/Photopic.app /Applications/Photopic.app"
   },
   "devDependencies": {
     "electron": "^31.0.0",
