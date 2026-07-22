@@ -1,0 +1,277 @@
+<DOMSymbolItem xmlns="http://ns.adobe.com/xfl/2008/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Symbol 23" itemID="6a3c4580-0000000e" lastModified="1782334875">
+     <timeline>
+          <DOMTimeline name="Symbol 23">
+               <layers>
+                    <DOMLayer name="Script Layer" color="#908283">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <Actionscript>
+                                        <script>function statePage(PluMinus)
+{
+   PageNum = Number(PageNum + PluMinus);
+   AtPage.text = PageNum;
+   if(PluMinus == 1)
+   {
+      ViewPosY += pageINcVal;
+   }
+   else
+   {
+      ViewPosY -= pageINcVal;
+   }
+}
+function PageNumSetUP()
+{
+   PageSze = _root.theScreen._height;
+   pageAmount = PageSze / pageINcVal;
+   pageAmount = Math.ceil(pageAmount);
+   if(_root.theScreen._height == 555.9)
+   {
+      pageAmount = 1;
+   }
+   PicPage.text = pageAmount;
+}
+function RightBtnAction()
+{
+   if(_root.itemShowing != "nothing")
+   {
+      _root.theScreen.CyclePhotos(_root.itemShowing,1);
+   }
+   else if(this.PageNum &lt; this.pageAmount)
+   {
+      _root.theScreen._y -= this.pageINcVal;
+      statePage(1);
+   }
+}
+function LeftBtnAction()
+{
+   if(_root.itemShowing != "nothing")
+   {
+      Whatis.text = "Photo";
+      _root.theScreen.CyclePhotos(_root.itemShowing,-1);
+   }
+   else if(this.PageNum &gt; 1)
+   {
+      Whatis.text = "Page";
+      _root.theScreen._y += this.pageINcVal;
+      statePage(-1);
+   }
+}
+ViewPosX = 0;
+ViewPosY = 0;
+pageINcVal = 483.5;
+PageNum = 1;
+AtPage.text = PageNum;
+Whatis.text = "Page";
+</script>
+                                   </Actionscript>
+                                   <elements/>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 2" color="#8ddb43">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMDynamicText fontRenderingMode="device" name="Whatis" width="33.2" height="10.65">
+                                             <matrix>
+                                                  <Matrix tx="493.55" ty="12.5"/>
+                                             </matrix>
+                                             <textRuns>
+                                                  <DOMTextRun>
+                                                       <characters/>
+                                                       <textAttrs>
+                                                            <DOMTextAttrs alignment="left" rotation="true" indent="0.0" leftMargin="0.0" lineSpacing="2.0" rightMargin="0.0" autoKern="false" size="0.0" bitmapSize="0" face="_sans" fillColor="#000000" alpha="1.0"/>
+                                                       </textAttrs>
+                                                  </DOMTextRun>
+                                             </textRuns>
+                                        </DOMDynamicText>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 3" color="#09bdc1">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 21" symbolType="button">
+                                             <matrix>
+                                                  <Matrix tx="634.0" ty="28.3" a="-1.0" d="-1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                             <Actionscript>
+                                                  <script>on(release){
+   this.RightBtnAction();
+}
+</script>
+                                             </Actionscript>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 4" color="#f161d9">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 20" symbolType="button">
+                                             <matrix>
+                                                  <Matrix tx="592.0" ty="8.9"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                             <Actionscript>
+                                                  <script>on(release){
+   this.LeftBtnAction();
+}
+</script>
+                                             </Actionscript>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 5" color="#33c2ff">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 16" symbolType="graphic" loop="loop">
+                                             <matrix>
+                                                  <Matrix tx="592.05" ty="8.5" a="0.05000000074505806" d="0.05000000074505806"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 6" color="#fbb7bb">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMDynamicText fontRenderingMode="device" name="AtPage" width="22.85" height="10.3">
+                                             <matrix>
+                                                  <Matrix tx="531.35" ty="12.55"/>
+                                             </matrix>
+                                             <textRuns>
+                                                  <DOMTextRun>
+                                                       <characters/>
+                                                       <textAttrs>
+                                                            <DOMTextAttrs alignment="center" rotation="true" indent="0.0" leftMargin="0.0" lineSpacing="2.0" rightMargin="0.0" autoKern="false" size="0.0" bitmapSize="0" face="_sans" fillColor="#000000" alpha="1.0"/>
+                                                       </textAttrs>
+                                                  </DOMTextRun>
+                                             </textRuns>
+                                        </DOMDynamicText>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 7" color="#8b32f1">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMDynamicText fontRenderingMode="device" name="PicPage" width="22.85" height="10.3">
+                                             <matrix>
+                                                  <Matrix tx="559.8" ty="12.55"/>
+                                             </matrix>
+                                             <textRuns>
+                                                  <DOMTextRun>
+                                                       <characters/>
+                                                       <textAttrs>
+                                                            <DOMTextAttrs alignment="center" rotation="true" indent="0.0" leftMargin="0.0" lineSpacing="2.0" rightMargin="0.0" autoKern="false" size="0.0" bitmapSize="0" face="_sans" fillColor="#000000" alpha="1.0"/>
+                                                       </textAttrs>
+                                                  </DOMTextRun>
+                                             </textRuns>
+                                        </DOMDynamicText>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 8" color="#8f7eda" current="true" isSelected="true">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMShape isFloating="true">
+                                             <fills>
+                                                  <FillStyle index="1">
+                                                       <SolidColor color="#ffffff"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="2">
+                                                       <SolidColor color="#e6e6e6"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="3">
+                                                       <SolidColor color="#929896"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="4">
+                                                       <SolidColor color="#919a99"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="5">
+                                                       <SolidColor color="#939997"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="6">
+                                                       <SolidColor color="#909a99"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="7">
+                                                       <SolidColor color="#8f9a96"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="8">
+                                                       <SolidColor color="#909b97"/>
+                                                  </FillStyle>
+                                                  <FillStyle index="9">
+                                                       <SolidColor color="#666666"/>
+                                                  </FillStyle>
+                                             </fills>
+                                             <strokes>
+                                                  <StrokeStyle index="1">
+                                                       <SolidStroke scaleMode="normal" weight="1.0">
+                                                            <fill>
+                                                                 <SolidColor color="#b2b2be"/>
+                                                            </fill>
+                                                       </SolidStroke>
+                                                  </StrokeStyle>
+                                             </strokes>
+                                             <edges>
+                                                  <Edge fillStyle0="0" fillStyle1="1" strokeStyle="0" edges="! 12800 770| 12800 2000| 0 2000| 0 770"/>
+                                                  <Edge fillStyle0="0" fillStyle1="2" strokeStyle="1" edges="! 0 770| 0 0| 12800 0| 12800 770"/>
+                                                  <Edge fillStyle0="1" fillStyle1="2" strokeStyle="1" edges="! 12800 770| 10432 770"/>
+                                                  <Edge fillStyle0="1" fillStyle1="2" strokeStyle="0" edges="! 10432 770| 10425 770"/>
+                                                  <Edge fillStyle0="1" fillStyle1="2" strokeStyle="1" edges="! 10425 770| 0 770"/>
+                                                  <Edge fillStyle0="5" fillStyle1="2" strokeStyle="0" edges="! 10432 30| 10425 30| 10425 50| 10432 50| 10445 50| 10445 30| 10432 30"/>
+                                                  <Edge fillStyle0="2" fillStyle1="3" strokeStyle="0" edges="! 10432 110| 10425 110| 10425 90| 10432 90| 10445 90| 10445 110| 10432 110"/>
+                                                  <Edge fillStyle0="2" fillStyle1="5" strokeStyle="0" edges="! 10425 210| 10432 210| 10445 210| 10445 230| 10432 230| 10425 230| 10425 210"/>
+                                                  <Edge fillStyle0="4" fillStyle1="2" strokeStyle="0" edges="! 10425 170| 10432 170| 10445 170| 10445 150| 10432 150| 10425 150| 10425 170"/>
+                                                  <Edge fillStyle0="2" fillStyle1="6" strokeStyle="0" edges="! 10432 290| 10425 290| 10425 270| 10432 270| 10445 270| 10445 290| 10432 290"/>
+                                                  <Edge fillStyle0="2" fillStyle1="7" strokeStyle="0" edges="! 10432 350| 10425 350| 10425 330| 10432 330| 10445 330| 10445 350| 10432 350"/>
+                                                  <Edge fillStyle0="5" fillStyle1="2" strokeStyle="0" edges="! 10425 470| 10432 470| 10445 470| 10445 450| 10432 450| 10425 450| 10425 470"/>
+                                                  <Edge fillStyle0="8" fillStyle1="2" strokeStyle="0" edges="! 10425 410| 10432 410| 10445 410| 10445 390| 10432 390| 10425 390| 10425 410"/>
+                                                  <Edge fillStyle0="4" fillStyle1="2" strokeStyle="0" edges="! 10445 590| 10445 570| 10432 570| 10425 570| 10425 590| 10432 590| 10445 590"/>
+                                                  <Edge fillStyle0="2" fillStyle1="3" strokeStyle="0" edges="! 10432 530| 10425 530| 10425 510| 10432 510| 10445 510| 10445 530| 10432 530"/>
+                                                  <Edge fillStyle0="2" fillStyle1="5" strokeStyle="0" edges="! 10425 630| 10432 630| 10445 630| 10445 650| 10432 650| 10425 650| 10425 630"/>
+                                                  <Edge fillStyle0="2" fillStyle1="6" strokeStyle="0" edges="! 10425 690| 10432 690| 10445 690| 10445 710| 10432 710| 10425 710| 10425 690"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 2072 386[ 2047 444 1973 444[ 1929 444 1901 420[ 1869 393 1869 345[ 1869 299 1897 276[ 1927 244 1973 244[ 2010 244 2038 260[ 2061 274 2072 302| 2040 309[ 2031 291 2014 282[ 1996 273 1973 273[ 1943 273 1924 291[ 1903 310 1903 345[ 1903 381 1927 402[ 1946 417 1974 417[ 2021 417 2041 380| 2072 386"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1821 246| 1821 443| 1786 443| 1786 246| 1821 246"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1786 184| 1821 184| 1821 222| 1786 222| 1786 184"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1684 397[ 1701 378 1701 345[ 1701 309 1683 290[ 1661 272 1629 272[ 1600 272 1579 289[ 1561 304 1560 320| 1560 331| 1560 341| 1560 372[ 1561 389 1581 403[ 1602 417 1628 417[ 1665 417 1684 397"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1633 444| 1586 436[ 1564 428 1560 416| 1560 514| 1526 514| 1526 246| 1560 246| 1560 280[ 1563 266 1584 255[ 1604 245 1633 245[ 1677 245 1705 270[ 1736 298 1736 345[ 1736 390 1707 418[ 1679 444 1633 444"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1285 272[ 1316 244 1364 244[ 1411 244 1442 270[ 1474 298 1474 345[ 1474 390 1443 417[ 1412 445 1364 445[ 1314 445 1284 418[ 1254 392 1254 345[ 1254 299 1285 272"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1288 345[ 1288 380 1312 400[ 1332 417 1364 417[ 1399 417 1420 397[ 1440 377 1440 345[ 1440 309 1422 290[ 1396 272 1364 272[ 1332 272 1311 291[ 1288 312 1288 345"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 1221 281| 1172 281| 1172 378[ 1172 414 1197 414| 1215 414| 1215 442| 1192 443[ 1162 443 1150 428[ 1139 413 1139 378| 1139 281| 1100 281| 1100 252| 1139 252| 1139 200| 1172 188| 1172 252| 1221 252| 1221 281"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 912 400[ 932 417 964 417[ 999 417 1020 397[ 1040 377 1040 345[ 1040 309 1022 290[ 996 272 964 272[ 932 272 911 291[ 888 312 888 345[ 888 380 912 400"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 885 272[ 916 244 964 244[ 1011 244 1042 270[ 1074 298 1074 345[ 1074 390 1043 417[ 1012 445 964 445[ 914 445 884 418[ 854 392 854 345[ 854 299 885 272"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 655 165| 655 282[ 658 268 675 258[ 696 244 722 244[ 803 244 803 327| 803 443| 769 443| 769 329[ 769 274 718 274[ 695 274 676 288[ 661 300 655 317| 655 443| 621 443| 621 165| 655 165"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 517 290[ 495 272 463 272[ 434 272 413 289[ 395 304 394 320| 394 331| 394 341| 394 372[ 395 389 415 403[ 436 417 462 417[ 499 417 518 397[ 535 378 535 345[ 535 309 517 290"/>
+                                                  <Edge fillStyle0="2" fillStyle1="9" strokeStyle="0" edges="! 570 345[ 570 390 541 418[ 513 444 467 444| 420 436[ 398 428 394 416| 394 514| 360 514| 360 246| 394 246| 394 280[ 397 266 418 255[ 438 245 467 245[ 511 245 539 270[ 570 298 570 345"/>
+                                             </edges>
+                                        </DOMShape>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+               </layers>
+          </DOMTimeline>
+     </timeline>
+</DOMSymbolItem>

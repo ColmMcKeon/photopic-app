@@ -1,0 +1,158 @@
+<DOMSymbolItem xmlns="http://ns.adobe.com/xfl/2008/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Symbol 11" itemID="6a3c4580-00000007" lastModified="1782334875" linkageIdentifier="theScreen" linkageExportForAS="true">
+     <timeline>
+          <DOMTimeline name="Symbol 11">
+               <layers>
+                    <DOMLayer name="Script Layer" color="#d3d352">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <Actionscript>
+                                        <script>function LoadThums()
+{
+   GrwoNum = 1;
+   i = 0;
+   while(i &lt; _root.PhotoArray.length)
+   {
+      ArrayindexNum = i;
+      ThumNailName = _root.PhotoArray[i];
+      ThumNailName = "P" + String(ThumNailName);
+      FirstSearch = ThumNailName.indexOf(".");
+      LastPart = ThumNailName.substr(0,FirstSearch);
+      ThumNailName = LastPart;
+      attachMovie("ThumbnailContainer",ThumNailName,this.getNextHighestDepth());
+      if(PhotoCount &lt; 5)
+      {
+         PhotoCount += 1;
+         this[ThumNailName]._x = Startx;
+         this[ThumNailName]._y = Starty;
+      }
+      else
+      {
+         Startx = 12.3;
+         Starty += yincr;
+         this[ThumNailName]._x = Startx;
+         this[ThumNailName]._y = Starty;
+         PhotoCount = 1;
+      }
+      this[ThumNailName].ThumNumb = ArrayindexNum;
+      loadMovie("Photos/" + _root.PhotoArray[i],this[ThumNailName].inset);
+      Startx += xincr;
+      _root.TheBOttom.PageNumSetUP();
+      GrwoNum = Number(GrwoNum + 1);
+      _root.WaitScrenwin.countScreen.text = GrwoNum;
+      i++;
+   }
+   _root.WaitScrenwin._x = -800;
+}
+function HideAll(slot_MC)
+{
+   i = 0;
+   while(i &lt; _root.PhotoArray.length)
+   {
+      ThumNailName = _root.PhotoArray[i];
+      ThumNailName = "P" + String(ThumNailName);
+      FirstSearch = ThumNailName.indexOf(".");
+      LastPart = ThumNailName.substr(0,FirstSearch);
+      ThumNailName = LastPart;
+      if(ThumNailName != slot_MC)
+      {
+         this[ThumNailName]._visible = false;
+      }
+      i++;
+   }
+}
+function ShowAll()
+{
+   i = 0;
+   while(i &lt; _root.PhotoArray.length)
+   {
+      ThumNailName = _root.PhotoArray[i];
+      ThumNailName = "P" + String(ThumNailName);
+      FirstSearch = ThumNailName.indexOf(".");
+      LastPart = ThumNailName.substr(0,FirstSearch);
+      ThumNailName = LastPart;
+      this[ThumNailName]._visible = true;
+      i++;
+   }
+}
+function CyclePhotos(thePhoto, PlusMinusNum)
+{
+   this[thePhoto].ClickMe(1);
+   LastPart = thePhoto.substr(1);
+   ArrayItem = LastPart;
+   i = 0;
+   while(i &lt; _root.PhotoArray.length)
+   {
+      itemInLine = String(_root.PhotoArray[i]);
+      FirstdotSearch = itemInLine.indexOf(".");
+      LastItemCut = itemInLine.substr(0,FirstdotSearch);
+      ArrayName = LastItemCut;
+      if(ArrayName == ArrayItem)
+      {
+         indexStart = i;
+         indexStart += PlusMinusNum;
+         lastItemInArray = Number(_root.PhotoArray.length - 1);
+         if(indexStart &lt; 0)
+         {
+            indexStart = lastItemInArray;
+         }
+         if(indexStart &gt; lastItemInArray)
+         {
+            indexStart = 0;
+         }
+         nextPic = _root.PhotoArray[indexStart];
+         nextPic = "P" + nextPic;
+         FirstNextPicSearch = nextPic.indexOf(".");
+         LastNextPicPart = nextPic.substr(0,FirstNextPicSearch);
+         this[LastNextPicPart].ClickMe(1);
+      }
+      i++;
+   }
+}
+Startx = 12.3;
+Starty = 18.4;
+xincr = 129;
+yincr = 120.9;
+PhotoCount = 0;
+GrwoNum = 0;
+</script>
+                                   </Actionscript>
+                                   <elements/>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 2" color="#83c998">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 10" name="HiLight" centerPoint3DX="66.5" centerPoint3DY="539.9">
+                                             <matrix>
+                                                  <Matrix tx="51.0" ty="523.9"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 3" color="#bb6d6e" current="true" isSelected="true">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 7" symbolType="graphic" loop="loop">
+                                             <matrix>
+                                                  <Matrix tx="0.0" ty="0.0" a="6.399993896484375" d="4.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+               </layers>
+          </DOMTimeline>
+     </timeline>
+</DOMSymbolItem>

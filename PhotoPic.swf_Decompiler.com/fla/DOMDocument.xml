@@ -1,0 +1,225 @@
+<DOMDocument xmlns="http://ns.adobe.com/xfl/2008/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" currentTimeline="1" xflVersion="2.2" creatorInfo="" platform="Windows" versionInfo="Saved by " majorVersion="" buildNumber="" nextSceneIdentifier="2" playOptionsPlayLoop="false" playOptionsPlayPages="false" playOptionsPlayFrameActions="false" autoSaveHasPrompted="true" backgroundColor="#ffffff" frameRate="30" width="640" height="520">
+     <symbols>
+          <Include href="Symbol 2.xml" itemID="6a3c4580-00000001" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 4.xml" itemID="6a3c4580-00000002" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 6.xml" itemID="6a3c4580-00000003" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 7.xml" itemID="6a3c4580-00000004" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 8.xml" itemID="6a3c4580-00000005" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 10.xml" itemID="6a3c4580-00000006" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 11.xml" itemID="6a3c4580-00000007" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 16.xml" itemID="6a3c4580-00000008" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 17.xml" itemID="6a3c4580-00000009" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 18.xml" itemID="6a3c4580-0000000a" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 19.xml" itemID="6a3c4580-0000000b" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 20.xml" itemID="6a3c4580-0000000c" itemIcon="0" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 21.xml" itemID="6a3c4580-0000000d" itemIcon="0" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 23.xml" itemID="6a3c4580-0000000e" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 24.xml" itemID="6a3c4580-0000000f" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 27.xml" itemID="6a3c4580-00000010" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 31.xml" itemID="6a3c4580-00000011" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 32.xml" itemID="6a3c4580-00000012" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 33.xml" itemID="6a3c4580-00000013" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 34.xml" itemID="6a3c4580-00000014" itemIcon="1" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 35.xml" itemID="6a3c4580-00000015" itemIcon="0" loadImmediate="false" lastModified="1782334875"/>
+          <Include href="Symbol 36.xml" itemID="6a3c4580-00000016" loadImmediate="false" lastModified="1782334875"/>
+     </symbols>
+     <timelines>
+          <DOMTimeline name="Scene 1">
+               <layers>
+                    <DOMLayer name="Script Layer" color="#49f6e9">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <Actionscript>
+                                        <script>function LoadXmlData()
+{
+   PhotoXML.onLoad = function(success)
+   {
+      if(success)
+      {
+         clearInterval(pollingxml);
+         WaitScrenwin._x = 206;
+         WaitScrenwin._y = 186;
+         PlacePromtWin._x = -580;
+         PlacePromtWin._y = -68;
+         child = PhotoXML.firstChild.childNodes;
+         i = 0;
+         while(i &lt; child.length)
+         {
+            PhotoArray.push(child[i].firstChild);
+            i++;
+         }
+         WaitScrn();
+      }
+      else if(ErrorFlag != "on")
+      {
+         PlacePromtWin.winInfoTxtScreen.text = "Place your .jpg\'s in the Photos folder and click here.";
+         PlacePromtWin._x = 191;
+         PlacePromtWin._y = 186;
+         ErrorFlag = "on";
+      }
+   };
+   PhotoXML.load("Photos/photos.xml");
+}
+function firstlist()
+{
+   PlacePromtWin.winInfoTxtScreen.text = "Please wait..";
+   fscommand("exec","PhotoManager.exe");
+   pollingxml = setInterval(function()
+   {
+      LoadXmlData();
+   }
+   ,2000);
+}
+function WaitScrn()
+{
+   WaitScrenwin.statusMes.text = "Loading Images..";
+   time = getTimer();
+   later = time + 2000;
+   this.createEmptyMovieClip("temp6",this.getNextHighestDepth());
+   temp6.onEnterFrame = function()
+   {
+      time = getTimer();
+      if(time &gt;= later)
+      {
+         delete this.onEnterFrame;
+         theScreen.LoadThums();
+      }
+   };
+}
+this._lockroot = true;
+itemShowing = "nothing";
+PhotoXML = new XML();
+PhotoArray = new Array();
+PhotoXML.ignoreWhite = true;
+LoadXmlData();
+this.onEnterFrame = function()
+{
+   theStageThing._Height = 480;
+   theStageThing._Width = 640;
+};
+ReturnCall = new Object();
+ReturnCall.onKeyDown = function()
+{
+   if(Key.getCode() == 39)
+   {
+      _root.TheBOttom.RightBtnAction();
+   }
+   else if(Key.getCode() == 37)
+   {
+      _root.TheBOttom.LeftBtnAction();
+   }
+};
+Key.addListener(ReturnCall);
+</script>
+                                   </Actionscript>
+                                   <elements/>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 2" color="#d17092">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMShape isFloating="true">
+                                             <fills/>
+                                             <strokes>
+                                                  <StrokeStyle index="1">
+                                                       <SolidStroke scaleMode="normal" weight="1.0">
+                                                            <fill>
+                                                                 <SolidColor color="#b2b2be"/>
+                                                            </fill>
+                                                       </SolidStroke>
+                                                  </StrokeStyle>
+                                             </strokes>
+                                             <edges>
+                                                  <Edge fillStyle0="0" fillStyle1="0" strokeStyle="1" edges="! 12795 5| 12795 10395| 5 10395| 5 5| 12795 5"/>
+                                             </edges>
+                                        </DOMShape>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 3" color="#b3af88">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 36" name="PlacePromtWin" centerPoint3DX="-468.5" centerPoint3DY="280.45">
+                                             <matrix>
+                                                  <Matrix tx="-602.0" ty="244.95" a="1.0000457763671875" d="1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 4" color="#7894db">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 27" name="WaitScrenwin" centerPoint3DX="-450.5" centerPoint3DY="187.5">
+                                             <matrix>
+                                                  <Matrix tx="-566.0" ty="154.0" a="1.0000457763671875" d="1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 5" color="#50c37b">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 24" centerPoint3DX="319.95" centerPoint3DY="-35.6">
+                                             <matrix>
+                                                  <Matrix tx="0.0" ty="-68.2" a="1.0000457763671875" d="1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 6" color="#f619b9">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 23" name="TheBOttom" centerPoint3DX="320.5" centerPoint3DY="531.75">
+                                             <matrix>
+                                                  <Matrix tx="0.0" ty="481.5" a="1.0000457763671875" d="1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+                    <DOMLayer name="Layer 7" color="#baeccc" current="true" isSelected="true">
+                         <frames>
+                              <DOMFrame index="0" keyMode="9728">
+                                   <elements>
+                                        <DOMSymbolInstance libraryItemName="Symbol 11" name="theScreen" centerPoint3DX="319.95" centerPoint3DY="277.95">
+                                             <matrix>
+                                                  <Matrix tx="0.0" ty="0.0" a="1.0000457763671875" d="1.0"/>
+                                             </matrix>
+                                             <transformationPoint>
+                                                  <Point/>
+                                             </transformationPoint>
+                                        </DOMSymbolInstance>
+                                   </elements>
+                              </DOMFrame>
+                         </frames>
+                    </DOMLayer>
+               </layers>
+          </DOMTimeline>
+     </timelines>
+</DOMDocument>
