@@ -2,7 +2,7 @@
 
 A modern macOS photo-gallery desktop app — a recreation of the original Flash **PhotoPic**, built with Electron.
 
-![icon](app/logo.png)
+<img src="app/logo.png" width="200" alt="Photopic icon" />
 
 ## Features
 
